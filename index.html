@@ -315,7 +315,6 @@
         }
 
         /* ── Loading progress tracker ── */
-        var _loadSteps = { firebase: false, threejs: false, gltf: false, scene: false };
         var _loadTotal = 3;
         var _loadDone = 0;
         var _progressArc = null;
@@ -395,7 +394,7 @@
                   loadScript("script_meteorlake.js", function () {
                     injectWatermark();
                   });
-                });
+                }, 800);
               });
             });
           })
