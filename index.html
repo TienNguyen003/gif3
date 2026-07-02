@@ -1,322 +1,404 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meteor Lake</title>
-  <link rel="stylesheet" href="style_meteorlake.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meteor Lake</title>
+    <link rel="stylesheet" href="style_meteorlake.css" />
 
-  <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/logo-192.png"> -->
 
-  <!-- Data tĩnh thay Firebase -->
-  <script>
-    // ── Sửa thông tin khách hàng ở đây ──
-    window.FIREBASE_SONG    = ''; // URL nhạc mp3
-    window.FIREBASE_LAKE_TEXT   = 'Yêu em mãi mãi';
-    window.FIREBASE_LAKE_TEXT_2 = 'Forever & Always';
+    <!-- Data tĩnh thay Firebase -->
+    <script>
+      // ── Sửa thông tin khách hàng ở đây ──
+      window.FIREBASE_SONG = ""; // URL nhạc mp3
+      window.FIREBASE_LAKE_TEXT = "Yêu em mãi mãi";
+      window.FIREBASE_LAKE_TEXT_2 = "Forever & Always";
 
-    // Stub Firebase để code cũ không bị lỗi
-    var _db = {
-      collection: function() {
-        return {
-          doc: function() {
-            return {
-              get: function() {
-                return Promise.resolve({ data: function() { return null; } });
-              }
-            };
-          }
-        };
+      // Stub Firebase để code cũ không bị lỗi
+      var _db = {
+        collection: function () {
+          return {
+            doc: function () {
+              return {
+                get: function () {
+                  return Promise.resolve({
+                    data: function () {
+                      return null;
+                    },
+                  });
+                },
+              };
+            },
+          };
+        },
+      };
+      var CUSTOMER_ID = "local";
+      var SONGS = [];
+      function fsGetImages() {
+        return Promise.resolve([]);
       }
-    };
-    var CUSTOMER_ID = 'local';
-    var SONGS = [];
-    function fsGetImages() { return Promise.resolve([]); }
-    function fsGetSong()   { return Promise.resolve(null); }
-  </script>
-</head>
+      function fsGetSong() {
+        return Promise.resolve(null);
+      }
+    </script>
+  </head>
 
-<body>
-
-<!-- Màn hình yêu cầu xoay ngang (mobile portrait) -->
-<div id="rotate-screen">
-  <div id="rotate-stars"></div>
-  <div id="rotate-content">
-    <div id="rotate-icon">
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="28" y="8" width="24" height="40" rx="3" stroke="rgba(100,180,255,0.9)" stroke-width="1.5"/>
-        <line x1="28" y1="14" x2="52" y2="14" stroke="rgba(100,180,255,0.6)" stroke-width="1"/>
-        <line x1="28" y1="42" x2="52" y2="42" stroke="rgba(100,180,255,0.6)" stroke-width="1"/>
-        <circle cx="40" cy="44.5" r="1.5" fill="rgba(100,180,255,0.8)"/>
-        <path d="M18 38 Q10 28 18 18" stroke="rgba(140,220,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M15 16 L18 18 L21 15" stroke="rgba(140,220,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M62 18 Q70 28 62 38" stroke="rgba(140,220,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M65 40 L62 38 L59 41" stroke="rgba(140,220,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div id="rotate-title">Xoay ngang màn hình</div>
-    <div id="rotate-sub">để trải nghiệm Meteor Lake</div>
-    <div id="rotate-hint">Rotate to landscape</div>
-  </div>
-</div>
-
-  <!-- Overlay text (bottom only) -->
-  <div id="ov">
-    <div class="ht" id="ts"></div>
-    <div class="ht" id="tg">Meteor Lake</div>
-  </div>
-
-  <!-- Enter / Intro screen -->
-  <div id="enter-screen">
-    <div id="enter-bg"></div>
-    <div id="enter-content">
-      <div id="enter-stars"></div>
-      <div id="enter-title">Meteor Lake</div>
-      <div id="enter-sub"></div>
-      <button id="enter-btn" disabled>
-        <span id="enter-btn-ring"></span>
-        <!-- SVG progress ring (hiện khi loading, ẩn khi xong) -->
-        <svg id="enter-progress-ring" viewBox="0 0 120 120" fill="none">
-          <circle cx="60" cy="60" r="52" stroke="rgba(60,160,255,0.12)" stroke-width="1.5"/>
-          <circle id="enter-progress-arc" cx="60" cy="60" r="52"
-            stroke="url(#progressGrad)" stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-dasharray="326.73" stroke-dashoffset="326.73"
-            transform="rotate(-90 60 60)"/>
-          <defs>
-            <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="rgba(100,200,255,0.9)"/>
-              <stop offset="100%" stop-color="rgba(60,120,255,0.5)"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <span id="enter-btn-icon">◈</span>
-        <span id="enter-btn-text">Đang chuẩn bị...</span>
-        <span id="enter-loading-detail">Kết nối dữ liệu</span>
-      </button>
-      <div id="enter-hint">
-        <span id="enter-hint-loading">Loading resources...</span>
-        <span id="enter-hint-ready" style="display:none">Touch to enter the lake</span>
+  <body>
+    <!-- Màn hình yêu cầu xoay ngang (mobile portrait) -->
+    <div id="rotate-screen">
+      <div id="rotate-stars"></div>
+      <div id="rotate-content">
+        <div id="rotate-icon">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="28" y="8" width="24" height="40" rx="3" stroke="rgba(100,180,255,0.9)" stroke-width="1.5" />
+            <line x1="28" y1="14" x2="52" y2="14" stroke="rgba(100,180,255,0.6)" stroke-width="1" />
+            <line x1="28" y1="42" x2="52" y2="42" stroke="rgba(100,180,255,0.6)" stroke-width="1" />
+            <circle cx="40" cy="44.5" r="1.5" fill="rgba(100,180,255,0.8)" />
+            <path
+              d="M18 38 Q10 28 18 18"
+              stroke="rgba(140,220,255,0.8)"
+              stroke-width="1.5"
+              fill="none"
+              stroke-linecap="round"
+            />
+            <path
+              d="M15 16 L18 18 L21 15"
+              stroke="rgba(140,220,255,0.8)"
+              stroke-width="1.5"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M62 18 Q70 28 62 38"
+              stroke="rgba(140,220,255,0.8)"
+              stroke-width="1.5"
+              fill="none"
+              stroke-linecap="round"
+            />
+            <path
+              d="M65 40 L62 38 L59 41"
+              stroke="rgba(140,220,255,0.8)"
+              stroke-width="1.5"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div id="rotate-title">Xoay ngang màn hình</div>
+        <div id="rotate-sub">để trải nghiệm Meteor Lake</div>
+        <div id="rotate-hint">Rotate to landscape</div>
       </div>
     </div>
-  </div>
 
-  <!-- Underwater blue vignette overlay -->
-  <div id="uw-overlay"></div>
+    <!-- Overlay text (bottom only) -->
+    <div id="ov">
+      <div class="ht" id="ts"></div>
+      <div class="ht" id="tg">Meteor Lake</div>
+    </div>
 
-  <!-- Control hint (fades out) -->
-  <div id="hint">Kéo để nhìn quanh &nbsp;·&nbsp; Cuộn để đến gần</div>
+    <!-- Enter / Intro screen -->
+    <div id="enter-screen">
+      <div id="enter-bg"></div>
+      <div id="enter-content">
+        <div id="enter-stars"></div>
+        <div id="enter-title">Meteor Lake</div>
+        <div id="enter-sub"></div>
+        <button id="enter-btn" disabled>
+          <span id="enter-btn-ring"></span>
+          <!-- SVG progress ring (hiện khi loading, ẩn khi xong) -->
+          <svg id="enter-progress-ring" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="52" stroke="rgba(60,160,255,0.12)" stroke-width="1.5" />
+            <circle
+              id="enter-progress-arc"
+              cx="60"
+              cy="60"
+              r="52"
+              stroke="url(#progressGrad)"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-dasharray="326.73"
+              stroke-dashoffset="326.73"
+              transform="rotate(-90 60 60)"
+            />
+            <defs>
+              <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(100,200,255,0.9)" />
+                <stop offset="100%" stop-color="rgba(60,120,255,0.5)" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span id="enter-btn-icon">◈</span>
+          <span id="enter-btn-text">Đang chuẩn bị...</span>
+          <span id="enter-loading-detail">Kết nối dữ liệu</span>
+        </button>
+        <div id="enter-hint">
+          <span id="enter-hint-loading">Loading resources...</span>
+          <span id="enter-hint-ready" style="display: none">Touch to enter the lake</span>
+        </div>
+      </div>
+    </div>
 
-  <!-- Music button -->
-  <button id="mb" title="Phát / Tạm dừng nhạc">
-    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle id="mb-ring1" cx="24" cy="24" r="22"
-        stroke="rgba(100,180,255,0.55)" stroke-width="1.2" stroke-dasharray="6 3"/>
-      <circle cx="24" cy="24" r="17" stroke="rgba(60,140,255,0.35)" stroke-width="0.8"/>
-      <circle cx="24" cy="24" r="14" fill="rgba(0,10,30,0.60)"/>
-      <polygon id="mb-play" points="20,16 20,32 35,24" fill="white" filter="url(#glow)"/>
-      <rect id="mb-p1" x="16" y="15" width="5" height="18" rx="2" fill="white" filter="url(#glow)"/>
-      <rect id="mb-p2" x="27" y="15" width="5" height="18" rx="2" fill="white" filter="url(#glow)"/>
-      <defs>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="1.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-    </svg>
-  </button>  <input type="file" id="mf" accept="audio/*" style="display:none">
-  <audio id="bgm" loop></audio>
+    <!-- Underwater blue vignette overlay -->
+    <div id="uw-overlay"></div>
 
-  <!-- Patch requestAnimationFrame để hỗ trợ đóng băng render khi bị ẩn -->
-  <script>
-    (function () {
-      const _raf = window.requestAnimationFrame.bind(window);
-      let _paused = false;
-      let _pending = null;
-      let _wasPlaying = false; // nhớ trạng thái nhạc trước khi bị tắt
+    <!-- Control hint (fades out) -->
+    <div id="hint">Kéo để nhìn quanh &nbsp;·&nbsp; Cuộn để đến gần</div>
 
-      window.requestAnimationFrame = function (cb) {
-        if (_paused) { _pending = cb; return 0; }
-        return _raf(cb);
-      };
+    <!-- Music button -->
+    <button id="mb" title="Phát / Tạm dừng nhạc">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle
+          id="mb-ring1"
+          cx="24"
+          cy="24"
+          r="22"
+          stroke="rgba(100,180,255,0.55)"
+          stroke-width="1.2"
+          stroke-dasharray="6 3"
+        />
+        <circle cx="24" cy="24" r="17" stroke="rgba(60,140,255,0.35)" stroke-width="0.8" />
+        <circle cx="24" cy="24" r="14" fill="rgba(0,10,30,0.60)" />
+        <polygon id="mb-play" points="20,16 20,32 35,24" fill="white" filter="url(#glow)" />
+        <rect id="mb-p1" x="16" y="15" width="5" height="18" rx="2" fill="white" filter="url(#glow)" />
+        <rect id="mb-p2" x="27" y="15" width="5" height="18" rx="2" fill="white" filter="url(#glow)" />
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </button>
+    <input type="file" id="mf" accept="audio/*" style="display: none" />
+    <audio id="bgm" loop></audio>
 
-      
-    })();
-  </script>
+    <!-- Patch requestAnimationFrame để hỗ trợ đóng băng render khi bị ẩn -->
+    <script>
+      (function () {
+        const _raf = window.requestAnimationFrame.bind(window);
+        let _paused = false;
+        let _pending = null;
+        let _wasPlaying = false; // nhớ trạng thái nhạc trước khi bị tắt
+
+        window.requestAnimationFrame = function (cb) {
+          if (_paused) {
+            _pending = cb;
+            return 0;
+          }
+          return _raf(cb);
+        };
+      })();
+    </script>
 
     <!-- firebase-shared.js đã bị thay bằng data tĩnh ở trên -->
 
-  <script>
-    /* ── Khởi động scene ── */
-    (function () {
-      function loadScript(src, cb) {
-        var s = document.createElement('script');
-        s.src = src; s.onload = cb; s.onerror = cb;
-        document.head.appendChild(s);
-      }
+    <script>
+      /* ── Khởi động scene ── */
+      (function () {
+        function loadScript(src, cb) {
+          var s = document.createElement("script");
+          var settled = false;
+          var timer = setTimeout(function () {
+            if (settled) return;
+            settled = true;
+            cb && cb(new Error("timeout"));
+          }, 12000);
 
-      function applyCustomer(name, ownerName) {
-        var sub = document.getElementById('enter-sub');
-        if (sub) sub.textContent = name || '';
-        var ts = document.getElementById('ts');
-        if (ts) ts.textContent = (ownerName || name || '') + (name ? "'s" : '');
-      }
+          function done(err) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            cb && cb(err);
+          }
 
-      // ── Gọi thẳng với tên muốn hiện ──
-      applyCustomer('Phương Linh', 'Phương Linh');
+          s.src = src;
+          s.onload = function () {
+            done(null);
+          };
+          s.onerror = function () {
+            done(new Error("load error"));
+          };
+          document.head.appendChild(s);
+        }
 
-      var _urlToken = (new URLSearchParams(window.location.search)).get('token') || '';
+        function applyCustomer(name, ownerName) {
+          var sub = document.getElementById("enter-sub");
+          if (sub) sub.textContent = name || "";
+          var ts = document.getElementById("ts");
+          if (ts) ts.textContent = (ownerName || name || "") + (name ? "'s" : "");
+        }
 
-      var p1 = _db.collection('customers').doc(CUSTOMER_ID).get()
-        .then(function(d) {
-          var data = d.data();
-          if (!data) return;
+        // ── Gọi thẳng với tên muốn hiện ──
+        applyCustomer("Phương Linh", "Phương Linh");
 
-          if (data.status !== 'paid') window.IS_PREVIEW = true;
+        var _urlToken = new URLSearchParams(window.location.search).get("token") || "";
 
-          if (data.name) applyCustomer(data.name, data.owner_name);
-          if (data.lake_text)   window.FIREBASE_LAKE_TEXT   = data.lake_text;
-          if (data.lake_text_2) window.FIREBASE_LAKE_TEXT_2 = data.lake_text_2;
-        })
-        .catch(function() {});
+        var p1 = _db
+          .collection("customers")
+          .doc(CUSTOMER_ID)
+          .get()
+          .then(function (d) {
+            var data = d.data();
+            if (!data) return;
 
-      var p2 = Promise.resolve();
+            if (data.status !== "paid") window.IS_PREVIEW = true;
+
+            if (data.name) applyCustomer(data.name, data.owner_name);
+            if (data.lake_text) window.FIREBASE_LAKE_TEXT = data.lake_text;
+            if (data.lake_text_2) window.FIREBASE_LAKE_TEXT_2 = data.lake_text_2;
+          })
+          .catch(function () {});
+
+        var p2 = Promise.resolve();
         window.FIREBASE_IMAGES = [
-        // "./img/1.jpg",
-        // "./img/2.jpg",
-        // "./img/3.jpg",
-        // "./img/4.jpg",
-        // "./img/5.jpg",
-        // "./img/6.jpg"
+          // "./img/1.jpg",
+          // "./img/2.jpg",
+          // "./img/3.jpg",
+          // "./img/4.jpg",
+          // "./img/5.jpg",
+          // "./img/6.jpg"
         ];
 
-      var p3 = fsGetSong('meteor')
-        .then(function(song) { if (song) window.FIREBASE_SONG = song; })
-        .catch(function() {});
+        var p3 = fsGetSong("meteor")
+          .then(function (song) {
+            if (song) window.FIREBASE_SONG = song;
+          })
+          .catch(function () {});
 
-      /* ── Watermark cho bản xem trước ── */
-      function injectWatermark() {
-        if (!window.IS_PREVIEW) return;
-        var id = '_wm_' + Math.random().toString(36).substr(2, 6);
-        var css = document.createElement('style');
-        css.textContent = [
-          '#' + id + '{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;}',
-          '#' + id + ' .wm-inner{position:absolute;top:-50%;left:-50%;width:200%;height:200%;',
-          '  display:flex;flex-wrap:wrap;align-content:flex-start;transform:rotate(-28deg);',
-          '  gap:60px 40px;animation:wmDrift 20s linear infinite;}',
-          '@keyframes wmDrift{0%{transform:rotate(-28deg) translate(0,0)}',
-          '  100%{transform:rotate(-28deg) translate(-80px,80px)}}',
-          '#' + id + ' .wm-line{white-space:nowrap;width:100%;',
-          '  font:600 clamp(13px,2.2vw,18px) sans-serif;letter-spacing:.18em;',
-          '  text-transform:uppercase;color:rgba(255,255,255,.12);',
-          '  text-shadow:0 0 8px rgba(100,180,255,.15);user-select:none;}',
-          '#' + id + ' .wm-line:nth-child(even){color:rgba(100,180,255,.12);}',
-        ].join('');
-        document.head.appendChild(css);
-        function create() {
-          var el = document.getElementById(id);
-          if (el) el.remove();
-          el = document.createElement('div');
-          el.id = id;
-          var inner = '<div class="wm-inner">';
-          for (var i = 0; i < 60; i++) {
-            inner += '<div class="wm-line">' + (i % 2 === 0
-              ? 'Bản xem trước · Chưa thanh toán · '
-              : 'Preview · Unpaid · ').repeat(8) + '</div>';
+        /* ── Watermark cho bản xem trước ── */
+        function injectWatermark() {
+          if (!window.IS_PREVIEW) return;
+          var id = "_wm_" + Math.random().toString(36).substr(2, 6);
+          var css = document.createElement("style");
+          css.textContent = [
+            "#" + id + "{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;}",
+            "#" + id + " .wm-inner{position:absolute;top:-50%;left:-50%;width:200%;height:200%;",
+            "  display:flex;flex-wrap:wrap;align-content:flex-start;transform:rotate(-28deg);",
+            "  gap:60px 40px;animation:wmDrift 20s linear infinite;}",
+            "@keyframes wmDrift{0%{transform:rotate(-28deg) translate(0,0)}",
+            "  100%{transform:rotate(-28deg) translate(-80px,80px)}}",
+            "#" + id + " .wm-line{white-space:nowrap;width:100%;",
+            "  font:600 clamp(13px,2.2vw,18px) sans-serif;letter-spacing:.18em;",
+            "  text-transform:uppercase;color:rgba(255,255,255,.12);",
+            "  text-shadow:0 0 8px rgba(100,180,255,.15);user-select:none;}",
+            "#" + id + " .wm-line:nth-child(even){color:rgba(100,180,255,.12);}",
+          ].join("");
+          document.head.appendChild(css);
+          function create() {
+            var el = document.getElementById(id);
+            if (el) el.remove();
+            el = document.createElement("div");
+            el.id = id;
+            var inner = '<div class="wm-inner">';
+            for (var i = 0; i < 60; i++) {
+              inner +=
+                '<div class="wm-line">' +
+                (i % 2 === 0 ? "Bản xem trước · Chưa thanh toán · " : "Preview · Unpaid · ").repeat(8) +
+                "</div>";
+            }
+            el.innerHTML = inner + "</div>";
+            document.body.appendChild(el);
           }
-          el.innerHTML = inner + '</div>';
-          document.body.appendChild(el);
-        }
-        create();
-        setInterval(function() { if (!document.getElementById(id)) create(); }, 800);
-      }
-
-      /* ── Loading progress tracker ── */
-      var _loadSteps = { firebase: false, threejs: false, gltf: false, scene: false };
-      var _loadTotal = 4;
-      var _loadDone = 0;
-      var _progressArc = null;
-      var _loadDetail = null;
-      var _circumference = 2 * Math.PI * 52; // 326.73
-
-      function updateLoadingUI(stepName) {
-        _loadDone++;
-        if (!_progressArc) _progressArc = document.getElementById('enter-progress-arc');
-        if (!_loadDetail) _loadDetail = document.getElementById('enter-loading-detail');
-        var pct = _loadDone / _loadTotal;
-        if (_progressArc) {
-          _progressArc.style.strokeDashoffset = _circumference * (1 - pct);
-        }
-        // Cập nhật text mô tả bước tiếp theo
-        if (_loadDetail) {
-          var msgs = {
-            firebase: 'Tải thư viện đồ họa',
-            threejs:  'Tải bộ dựng hình 3D',
-            gltf:     'Khởi tạo cảnh hồ',
-            scene:    ''
-          };
-          _loadDetail.textContent = msgs[stepName] || '';
-        }
-        // Khi tất cả xong → kích hoạt nút
-        if (_loadDone >= _loadTotal) {
-          onAllLoaded();
-        }
-      }
-
-      function onAllLoaded() {
-        var btn = document.getElementById('enter-btn');
-        var btnText = document.getElementById('enter-btn-text');
-        var detail = document.getElementById('enter-loading-detail');
-        var ring = document.getElementById('enter-progress-ring');
-        var hintLoading = document.getElementById('enter-hint-loading');
-        var hintReady = document.getElementById('enter-hint-ready');
-        var btnRing = document.getElementById('enter-btn-ring');
-
-        // Hoàn thành progress ring
-        if (ring) {
-          var arc = ring.querySelector('#enter-progress-arc');
-          if (arc) arc.style.strokeDashoffset = '0';
+          create();
+          setInterval(function () {
+            if (!document.getElementById(id)) create();
+          }, 800);
         }
 
-        // Delay nhỏ để người dùng thấy ring đầy trước khi chuyển
-        setTimeout(function() {
-          // Bật nút
-          if (btn) btn.removeAttribute('disabled');
-          btn.classList.add('ready');
+        /* ── Loading progress tracker ── */
+        var _loadSteps = { firebase: false, threejs: false, gltf: false, scene: false };
+        var _loadTotal = 4;
+        var _loadDone = 0;
+        var _progressArc = null;
+        var _loadDetail = null;
+        var _circumference = 2 * Math.PI * 52; // 326.73
 
-          // Đổi text
-          if (btnText) btnText.textContent = 'Chạm để bước vào hồ';
-          if (detail) detail.style.display = 'none';
+        function updateLoadingUI(stepName) {
+          _loadDone++;
+          if (!_progressArc) _progressArc = document.getElementById("enter-progress-arc");
+          if (!_loadDetail) _loadDetail = document.getElementById("enter-loading-detail");
+          var pct = _loadDone / _loadTotal;
+          if (_progressArc) {
+            _progressArc.style.strokeDashoffset = _circumference * (1 - pct);
+          }
+          // Cập nhật text mô tả bước tiếp theo
+          if (_loadDetail) {
+            var msgs = {
+              firebase: "Tải thư viện đồ họa",
+              threejs: "Tải bộ dựng hình 3D",
+              gltf: "Khởi tạo cảnh hồ",
+              scene: "",
+            };
+            _loadDetail.textContent = msgs[stepName] || "";
+          }
+          // Khi tất cả xong → kích hoạt nút
+          if (_loadDone >= _loadTotal) {
+            onAllLoaded();
+          }
+        }
 
-          // Ẩn progress ring, hiện ring xoay bình thường
-          if (ring) ring.style.display = 'none';
-          if (btnRing) btnRing.style.display = '';
+        function onAllLoaded() {
+          var btn = document.getElementById("enter-btn");
+          var btnText = document.getElementById("enter-btn-text");
+          var detail = document.getElementById("enter-loading-detail");
+          var ring = document.getElementById("enter-progress-ring");
+          var hintLoading = document.getElementById("enter-hint-loading");
+          var hintReady = document.getElementById("enter-hint-ready");
+          var btnRing = document.getElementById("enter-btn-ring");
 
-          // Đổi hint
-          if (hintLoading) hintLoading.style.display = 'none';
-          if (hintReady) hintReady.style.display = '';
-        }, 400);
-      }
+          // Hoàn thành progress ring
+          if (ring) {
+            var arc = ring.querySelector("#enter-progress-arc");
+            if (arc) arc.style.strokeDashoffset = "0";
+          }
 
-      Promise.all([p1, p2, p3]).then(function() {
-        if (!window.FIREBASE_SONG)
-          window.FIREBASE_SONG = (typeof SONGS !== 'undefined' && SONGS.length) ? SONGS[0].file : '';
-        updateLoadingUI('firebase');
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', function() {
-          updateLoadingUI('threejs');
-          loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js', function() {
-            updateLoadingUI('gltf');
-            loadScript('script_meteorlake.js', function() {
-              updateLoadingUI('scene');
-              injectWatermark();
+          // Delay nhỏ để người dùng thấy ring đầy trước khi chuyển
+          setTimeout(function () {
+            // Bật nút
+            if (btn) btn.removeAttribute("disabled");
+            btn.classList.add("ready");
+
+            // Đổi text
+            if (btnText) btnText.textContent = "Chạm để bước vào hồ";
+            if (detail) detail.style.display = "none";
+
+            // Ẩn progress ring, hiện ring xoay bình thường
+            if (ring) ring.style.display = "none";
+            if (btnRing) btnRing.style.display = "";
+
+            // Đổi hint
+            if (hintLoading) hintLoading.style.display = "none";
+            if (hintReady) hintReady.style.display = "";
+          }, 400);
+        }
+
+        Promise.all([p1, p2, p3])
+          .then(function () {
+            if (!window.FIREBASE_SONG)
+              window.FIREBASE_SONG = typeof SONGS !== "undefined" && SONGS.length ? SONGS[0].file : "";
+            updateLoadingUI("firebase");
+            loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js", function () {
+              updateLoadingUI("threejs");
+              loadScript("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js", function () {
+                updateLoadingUI("gltf");
+                loadScript("script_meteorlake.js", function () {
+                  updateLoadingUI("scene");
+                  injectWatermark();
+                });
+              });
             });
-          });
-        });
-      }).catch(function() {});
-    })();
-  </script>
-</body>
+          })
+          .catch(function () {});
+      })();
+    </script>
+  </body>
 </html>
